@@ -37,7 +37,6 @@ static void PrintUsage(void)
 {
     Com_Printf("\t\t***************************************");
     Com_Printf("\t\t** BASIC LINE ACTION MACRO COMPILER  **");
-    Com_Printf("\t\t**    email: svkaiser@gmail.com      **");
     Com_Printf("\t\t***************************************");
     Com_Printf("\n");
     Com_Printf("Usage: <blam.exe> <scriptfile> <outfile> <option>\n");

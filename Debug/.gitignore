@@ -1,0 +1,6 @@
+.vs
+Debug/blam.tlog
+Release/blam.tlog
+*.zip
+*.user
+*.obj
