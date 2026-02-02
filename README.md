@@ -3,10 +3,10 @@ BLAM there it is! This is a Doom 64 macro compiler originally developed by [Kais
 
 
 ## Usage
-Usage: <blam.exe> <scriptfile> <outfile> <option>
+Usage: \<blam.exe\> \<scriptfile\> \<outfile\> \<option\>
 
 
-Options:
+### Options
 
 -d	Decompile script lump
 
