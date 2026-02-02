@@ -4,3 +4,12 @@ Release/blam.tlog
 *.zip
 *.user
 *.obj
+*.exe
+*.recipe
+*.ilk
+*.log
+*.pdb
+*.idb
+*.iobj
+*.ipdb
+*.FileListAbsolute.txt
