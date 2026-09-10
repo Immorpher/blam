@@ -104,6 +104,7 @@ extern dboolean verbose;
 extern FILE *debugfile;
 
 void SC_Open(char* name);
+void SC_OpenBuffer(const char *name, const char *data, int size);
 void SC_Close(void);
 int SC_ReadTokens(void);
 void SC_CheckKeywords(void);

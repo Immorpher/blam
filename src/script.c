@@ -142,6 +142,35 @@ void SC_Open(char* name)
 }
 
 //
+// SC_OpenBuffer like SC_Open but for built-in macro definitions
+//
+
+void SC_OpenBuffer(const char *name, const char *data, int size)
+{
+    Com_Printf("--------SC_OpenBuffer: Reading %s--------\n", name);
+    SC_DebugPrintf("opening %s\n", name);
+
+    sc_parser->buffsize = size;
+    sc_parser->buffer   = (char*)Com_Alloc(size);
+    memcpy(sc_parser->buffer, data, size);
+
+    Com_Printf("%s size: %i bytes\n", name, sc_parser->buffsize);
+
+    SC_PushNestedFilename((char*)name);
+
+    sc_parser->pointer_start    = sc_parser->buffer;
+    sc_parser->pointer_end      = sc_parser->buffer + sc_parser->buffsize;
+    sc_parser->linepos          = 1;
+    sc_parser->rowpos           = 1;
+    sc_parser->buffpos          = 0;
+    sc_parser->identifier       = NULL;
+    sc_parser->stack            = NULL;
+    sc_parser->tokentype        = TK_NONE;
+    sc_parser->isamacro         = false;
+    sc_parser->name             = name;
+}
+
+//
 // SC_Close
 //
 

@@ -25,6 +25,7 @@
 #include "macro.h"
 #include "script.h"
 #include "parse.h"
+#include "common_defs.h"
 
 static void PS_ParseInner(void);
 static void PS_ParseOuter(void);
@@ -264,6 +265,13 @@ void PS_ParseScript(void)
     ps_loopline = 0;
     ps_loopvalue = 0;
     ps_enterloop = false;
+
+	// Parse the built-in macro definitions
+    SC_PushParser();
+    SC_OpenBuffer("<built-in common.txt>", g_builtin_common_defs,
+        (int)strlen(g_builtin_common_defs));
+    PS_ParseOuter();
+    SC_Close();
 
     PS_ParseOuter();
 }
