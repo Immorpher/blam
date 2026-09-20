@@ -234,8 +234,21 @@ static void PS_ParseOuter(void)
                     SC_RemoveIdentifier();
                     break;
                 case TK_SETDIR:
-                    SC_GetString();
-                    sprintf(ps_userdirectory, "%s", sc_parser->token);
+                    {
+                        int dirlen;
+
+                        SC_GetString();
+                        sprintf(ps_userdirectory, "%s", sc_parser->token);
+                        
+                        // Add trailing slash if missing
+                        dirlen = strlen(ps_userdirectory);
+                        if(dirlen > 0 && ps_userdirectory[dirlen-1] != '/' && 
+                           ps_userdirectory[dirlen-1] != '\\')
+                        {
+                            ps_userdirectory[dirlen] = '/';
+                            ps_userdirectory[dirlen+1] = '\0';
+                        }
+                    }
                     break;
                 default:
                     break;
