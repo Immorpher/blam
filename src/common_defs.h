@@ -10,6 +10,10 @@ static const char *g_builtin_common_defs =
     "#define Door_RaiseFast(tag)                             108:tag\n"
     "#define Door_OpenFast(tag)                              109:tag\n"
     "#define Door_CloseFast(tag)                             110:tag\n"
+    "#define Door_RaiseAdjacent                              1:0\n"
+    "#define Door_OpenAdjacent                               31:0\n"
+    "#define Door_SplitRaiseAdjacent                         117:0\n"
+    "#define Door_SplitOpenAdjacent                          118:0\n"
     "#define Floor_Raise(tag)                                5:tag\n" // Floors
     "#define Floor_Lower(tag)                                19:tag\n"
     "#define Floor_RaiseToNearest(tag)                       30:tag\n"
@@ -61,6 +65,7 @@ static const char *g_builtin_common_defs =
     "#define Thing_SpawnTracer(tid)                          231:tid\n"
     "#define Thing_SetReactionTime(tics)                     233:tics\n"
     "#define Thing_Dissolve(tid)                             242:tid\n"
+    "#define Thing_SpawnSilent(tid)                          211:tid\n"
     "#define Sector_SetFloorColorID(tag, id)                 PushVar(id); 205:tag\n" // Sectors
     "#define Sector_SetCeilingColorID(tag, id)               PushVar(id); 206:tag\n"
     "#define Sector_SetThingColorID(tag, id)                 PushVar(id); 207:tag\n"
@@ -80,6 +85,14 @@ static const char *g_builtin_common_defs =
     "#define Camera_Clear(tid)                               200:tid\n" // Camera
     "#define Camera_Set(tid)                                 201:tid\n"
     "#define Camera_MoveAndAim(tid, nexttid)                 PushVar(nexttid); 243:tid\n"
+    "#define Light_Strobe(tag)                               17:tag\n" // Lights
+    "#define Artifact_ActivateOrange(tag)                    90:tag\n" // Artifacts
+    "#define Artifact_ActivateBlue(tag)                      91:tag\n"
+    "#define Artifact_ActivatePurple(tag)                    92:tag\n"
+    "#define Sound_Play(id)                                  213:id\n" // Sound
+    "#define Music_Stop                                      215:0\n"
+    "#define Music_Change(id)                                216:id\n"
+    "#define Sky_Change(id)                                  217:id\n"
     "#define Macro_Suspend(id)                               248:id\n" // Macro control
     "#define Macro_Enable(id)                                250:id\n"
     "#define Macro_Disable(id)                               251:id\n"

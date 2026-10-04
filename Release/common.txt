@@ -20,6 +20,10 @@
 #define Door_RaiseFast(tag)                             108:tag
 #define Door_OpenFast(tag)                              109:tag
 #define Door_CloseFast(tag)                             110:tag
+#define Door_RaiseAdjacent                              1:0
+#define Door_OpenAdjacent                               31:0
+#define Door_SplitRaiseAdjacent                         117:0
+#define Door_SplitOpenAdjacent                          118:0
 
 //
 // FLOORS
@@ -95,6 +99,7 @@
 #define Thing_SpawnTracer(tid)                          231:tid
 #define Thing_SetReactionTime(tics)                     233:tics
 #define Thing_Dissolve(tid)                             242:tid
+#define Thing_SpawnSilent(tid)                          211:tid
 
 //
 // SECTORS
@@ -134,6 +139,26 @@
 #define Camera_Clear(tid)                               200:tid
 #define Camera_Set(tid)                                 201:tid
 #define Camera_MoveAndAim(tid, nexttid)                 PushVar(nexttid); 243:tid
+
+//
+// LIGHTS
+//
+#define Light_Strobe(tag)                               17:tag
+
+//
+// ARTIFACTS
+//
+#define Artifact_ActivateOrange(tag)                    90:tag
+#define Artifact_ActivateBlue(tag)                      91:tag
+#define Artifact_ActivatePurple(tag)                    92:tag
+
+//
+// SOUND
+//
+#define Sound_Play(id)                                  213:id
+#define Music_Stop                                      215:0
+#define Music_Change(id)                                216:id
+#define Sky_Change(id)                                  217:id
 
 //
 // MACROS

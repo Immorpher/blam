@@ -429,7 +429,9 @@ static void SC_GetLetterToken(char initial)
     int c = initial;
     int i = 0;
 
-    while(sc_charcode[c] == CHAR_LETTER)
+    // identifiers may contain digits after the first character
+    // (Floor_Raise24, Stairs_Build16Fast, ...), but not '-'
+    while(sc_charcode[c] == CHAR_LETTER || (c >= '0' && c <= '9'))
     {
         sc_parser->token[i++] = c;
         c = SC_GetChar();

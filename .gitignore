@@ -13,3 +13,4 @@ Release/blam.tlog
 *.iobj
 *.ipdb
 *.FileListAbsolute.txt
+/Debug

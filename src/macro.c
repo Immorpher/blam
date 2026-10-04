@@ -154,7 +154,7 @@ typedef struct
 static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
 {
     { "No_Op", 0 },                     // 0
-    { NULL, 0 },                        // 1
+    { "Door_RaiseAdjacent", 0 },        // 1
     { "Door_Open", 1 },                 // 2
     { "Door_Close",1 },                 // 3
     { "Door_Raise",1 },                 // 4
@@ -170,7 +170,7 @@ static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
     { NULL, 0 },                        // 14
     { NULL, 0 },                        // 15
     { "Door_CloseWait30Open", 1 },      // 16
-    { NULL, 0 },                        // 17
+    { "Light_Strobe", 1 },              // 17
     { NULL, 0 },                        // 18
     { "Floor_Lower", 1 },               // 19
     { NULL, 0 },                        // 20
@@ -184,7 +184,7 @@ static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
     { NULL, 0 },                        // 28
     { NULL, 0 },                        // 29
     { "Floor_RaiseToNearest", 1 },      // 30
-    { NULL, 0 },                        // 31
+    { "Door_OpenAdjacent", 0 },         // 31
     { NULL, 0 },                        // 32
     { NULL, 0 },                        // 33
     { NULL, 0 },                        // 34
@@ -243,9 +243,9 @@ static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
     { NULL, 0 },                        // 87
     { NULL, 0 },                        // 88
     { NULL, 0 },                        // 89
-    { NULL, 0 },                        // 90
-    { NULL, 0 },                        // 91
-    { NULL, 0 },                        // 92
+    { "Artifact_ActivateOrange", 1 },   // 90
+    { "Artifact_ActivateBlue", 1 },     // 91
+    { "Artifact_ActivatePurple", 1 },   // 92
     { "Thing_ModifyFlags", 1 },         // 93
     { "Thing_Alert", 1 },               // 94
     { NULL, 0 },                        // 95
@@ -270,8 +270,8 @@ static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
     { NULL, 0 },                        // 114
     { NULL, 0 },                        // 115
     { NULL, 0 },                        // 116
-    { NULL, 0 },                        // 117
-    { NULL, 0 },                        // 118
+    { "Door_SplitRaiseAdjacent", 0 },   // 117
+    { "Door_SplitOpenAdjacent", 0 },    // 118
     { "Floor_RaiseToNearest2", 1 },     // 119
     { NULL, 0 },                        // 120
     { "Plat_DownWaitUpFast", 1 },       // 121
@@ -364,13 +364,13 @@ static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
     { "Sector_SetUpperWallColorID", 2 },// 208
     { "Sector_SetLowerWallColorID", 2 },// 209
     { "Ceiling_MoveByValue", 2 },       // 210
-    { NULL, 0 },
+    { "Thing_SpawnSilent", 1 },         // 211
     { "Floor_MoveByValue", 2 },         // 212
-    { NULL, 0 },
+    { "Sound_Play", 1 },                // 213
     { "Elevator_MoveByValue", 2 },      // 214
-    { NULL, 0 },
-    { NULL, 0 },
-    { NULL, 0 },
+    { "Music_Stop", 0 },                // 215
+    { "Music_Change", 1 },              // 216
+    { "Sky_Change", 1 },                // 217
     { "Line_CopyFlags", 2 },            // 218
     { "Line_CopyTextures", 2 },         // 219
     { "Sector_CopyFlags", 2 },          // 220
@@ -385,7 +385,7 @@ static m_decmp_table_t decmp_table[MAX_LINE_SPECIALS] =
     { "Floor_MoveByValueInstant", 2 },  // 229
     { "Line_CopySpecials", 2 },         // 230
     { "Thing_SpawnTracer", 1 },         // 231
-    { "Ceiling_RaiseCrushFast", 1 },    // 232
+    { "Ceiling_RaiseCrushOnceFast", 1 },// 232
     { "Player_Freeze", 1 },             // 233
     { "SetLightID", 2 },                // 234
     { "Sector_CopyLightsAndInterpolate", 2 },// 235
