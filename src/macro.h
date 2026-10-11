@@ -23,8 +23,24 @@
 #ifndef __BLAM_MACRO__
 #define __BLAM_MACRO__
 
-#define MAX_MACRO_DATA  255
-#define MAX_MACRO_DEFS  255
+// Growable storage. These are only the INITIAL capacities; both the macro
+// table and each macro's action list are reallocated on demand, so a script
+// is no longer silently truncated/corrupted when it exceeds them.
+#define INIT_MACRO_DEFS     256
+#define INIT_MACRO_DATA     256
+
+// The MACROS lump stores all counts as 16-bit values, so this is a real
+// format limit and is enforced with a hard error.
+#define HARD_MACRO_DATA     32767
+#define HARD_MACRO_DEFS     32767
+
+// Advisory only: the original 2012 tool used a fixed 255-entry buffer, so
+// lumps larger than this were never exercised by the retail toolchain.
+#define WARN_MACRO_DATA     255
+
+// Legacy aliases, kept so external code still compiles.
+#define MAX_MACRO_DATA  INIT_MACRO_DATA
+#define MAX_MACRO_DEFS  INIT_MACRO_DEFS
 
 typedef struct
 {
@@ -35,11 +51,12 @@ typedef struct
 
 typedef struct
 {
-	short actions;
-	macrodata_t data[MAX_MACRO_DATA];
+	int actions;			// entries currently used
+	int maxactions;			// entries currently allocated
+	macrodata_t *data;		// grown by M_AppendAction
 } macrodef_t;
 
-extern macrodef_t macrodefs[MAX_MACRO_DEFS];
+extern macrodef_t *macrodefs;
 extern macrodata_t *macroaction;
 extern macrodef_t *activemacro;
 extern int m_activemacros;
@@ -47,6 +64,7 @@ extern int m_totalactions;
 extern int m_currentline;
 
 void M_Init(void);
+void M_Shutdown(void);
 void M_NewMacro(int id);
 void M_AppendAction(int type, int tag);
 void M_NewLine(void);

@@ -25,7 +25,7 @@
 #include "macro.h"
 #include "parse.h"
 
-macrodef_t macrodefs[MAX_MACRO_DEFS];
+macrodef_t *macrodefs;
 macrodef_t *activemacro;
 macrodata_t *macroaction;
 
@@ -33,15 +33,92 @@ int m_activemacros;
 int m_totalactions;
 int m_currentline;
 
+static int m_maxmacrodefs;
+static int m_activeindex;
+
+//
+// M_EnsureDefs
+//
+// Grows the macro table so that at least 'count' definitions are addressable.
+// New slots are zeroed so that unused macro ids write out as empty.
+//
+
+static void M_EnsureDefs(int count)
+{
+    int oldmax;
+
+    if(count <= m_maxmacrodefs)
+        return;
+
+    oldmax = m_maxmacrodefs;
+
+    if(m_maxmacrodefs <= 0)
+        m_maxmacrodefs = INIT_MACRO_DEFS;
+
+    while(m_maxmacrodefs < count)
+        m_maxmacrodefs *= 2;
+
+    macrodefs = (macrodef_t*)realloc(macrodefs,
+        sizeof(macrodef_t) * m_maxmacrodefs);
+
+    if(macrodefs == NULL)
+        Com_Error("M_EnsureDefs: out of memory growing macro table to %i", m_maxmacrodefs);
+
+    memset(&macrodefs[oldmax], 0, sizeof(macrodef_t) * (m_maxmacrodefs - oldmax));
+}
+
+//
+// M_EnsureData
+//
+// Grows a single macro's action list. This is the allocation that the
+// original code never performed; it wrote past a fixed 255-entry array and
+// into the following macro definition.
+//
+
+static void M_EnsureData(macrodef_t *def, int count)
+{
+    if(count <= def->maxactions)
+        return;
+
+    if(def->maxactions <= 0)
+        def->maxactions = INIT_MACRO_DATA;
+
+    while(def->maxactions < count)
+        def->maxactions *= 2;
+
+    def->data = (macrodata_t*)realloc(def->data,
+        sizeof(macrodata_t) * def->maxactions);
+
+    if(def->data == NULL)
+        Com_Error("M_EnsureData: out of memory growing macro to %i entries", def->maxactions);
+}
+
 //
 // M_NewMacro
 //
 
 void M_NewMacro(int id)
 {
-    activemacro = &macrodefs[id-1];
-    macroaction = macrodefs[id-1].data;
+    if(id < 1 || id > HARD_MACRO_DEFS)
+    {
+        Com_Error("M_NewMacro: macro id %i is out of range (must be 1 - %i)",
+            id, HARD_MACRO_DEFS);
+    }
+
+    M_EnsureDefs(id);
+
+    m_activeindex = id - 1;
+    activemacro = &macrodefs[m_activeindex];
+
+    if(activemacro->actions != 0)
+    {
+        Com_Printf("Warning: macro %i is defined more than once; "
+                   "the previous definition (%i entries) is discarded\n",
+                   id, activemacro->actions);
+    }
+
     activemacro->actions = 0;
+    macroaction = activemacro->data;
     m_currentline = 10;
 
     if(id > m_activemacros)
@@ -56,17 +133,31 @@ void M_AppendAction(int type, int tag)
 {
     macrodata_t* macro;
 
+    if(activemacro == NULL)
+    {
+        Com_Error("M_AppendAction: action %i appears outside of a macro block", type);
+    }
+
     if(type == 248 || type == 250 || type == 251)
     {
         tag = 256 + (tag-1);
     }
 
-    macro = &macroaction[activemacro->actions++];
+    if(activemacro->actions >= HARD_MACRO_DATA)
+    {
+        Com_Error("M_AppendAction: macro %i exceeds the %i entry format limit",
+            m_activeindex + 1, HARD_MACRO_DATA);
+    }
+
+    M_EnsureData(activemacro, activemacro->actions + 1);
+
+    // the data block may have moved; keep the legacy pointer valid
+    macroaction = activemacro->data;
+
+    macro = &activemacro->data[activemacro->actions++];
     macro->special = type;
     macro->id = m_currentline;
     macro->tag = tag;
-
-    m_totalactions++;
 }
 
 //
@@ -105,14 +196,39 @@ void M_WriteMacroLump(void)
     int i;
     int j;
 
-    Com_SetWriteBinaryFile("%s", myargv[2]);
-
-    Com_Write16(m_activemacros);
-    Com_Write16(m_totalactions);
+    // Recompute the header totals from the data that is actually about to be
+    // written. The engine sizes one allocation from these two numbers
+    // ((nummacros + specialCount) entries), so they must agree exactly with
+    // the body or P_LoadMacros overruns its zone block.
+    m_totalactions = 0;
 
     for(i = 0; i < m_activemacros; i++)
     {
-        Com_Write16(macrodefs[i].actions);
+        m_totalactions += macrodefs[i].actions;
+
+        if(macrodefs[i].actions > WARN_MACRO_DATA)
+        {
+            Com_Printf("Warning: macro %i has %i entries; the retail tools "
+                       "never produced more than %i and some ports may not "
+                       "handle it\n",
+                       i + 1, macrodefs[i].actions, WARN_MACRO_DATA);
+        }
+    }
+
+    if(m_activemacros > HARD_MACRO_DEFS || m_totalactions > HARD_MACRO_DATA)
+    {
+        Com_Error("M_WriteMacroLump: %i macros / %i actions will not fit in "
+                  "the 16-bit lump header", m_activemacros, m_totalactions);
+    }
+
+    Com_SetWriteBinaryFile("%s", myargv[2]);
+
+    Com_Write16((short)m_activemacros);
+    Com_Write16((short)m_totalactions);
+
+    for(i = 0; i < m_activemacros; i++)
+    {
+        Com_Write16((short)macrodefs[i].actions);
 
         for(j = 0; j < macrodefs[i].actions; j++)
         {
@@ -137,10 +253,45 @@ void M_Init(void)
 {
     activemacro = NULL;
     macroaction = NULL;
+    macrodefs = NULL;
     m_activemacros = 0;
     m_totalactions = 0;
     m_currentline = 0;
-    memset(macrodefs, 0, sizeof(macrodef_t) * MAX_MACRO_DATA);
+    m_maxmacrodefs = 0;
+    m_activeindex = 0;
+
+    M_EnsureDefs(INIT_MACRO_DEFS);
+}
+
+//
+// M_Shutdown
+//
+
+void M_Shutdown(void)
+{
+    int i;
+
+    if(macrodefs == NULL)
+        return;
+
+    for(i = 0; i < m_maxmacrodefs; i++)
+    {
+        if(macrodefs[i].data != NULL)
+        {
+            free(macrodefs[i].data);
+            macrodefs[i].data = NULL;
+        }
+
+        macrodefs[i].actions = 0;
+        macrodefs[i].maxactions = 0;
+    }
+
+    free(macrodefs);
+
+    macrodefs = NULL;
+    activemacro = NULL;
+    macroaction = NULL;
+    m_maxmacrodefs = 0;
 }
 
 typedef struct
@@ -424,12 +575,19 @@ void M_DecompileMacro(const char *file)
     int j;
     int scriptline;
     int scriptvar;
+    int pos;
 
     len = Com_ReadBinaryFile(file, &buffer);
     Com_Printf("--------Decompiling %s--------\n", file);
 
+    if(len < 4)
+    {
+        Com_Error("M_DecompileMacro: %s is too small to be a MACROS lump", file);
+    }
+
     nummacros = Com_Read16(buffer);
     Com_Read16(buffer);
+    pos = 4;
     Com_Printf("%i macros...\n", nummacros);
 
     Com_SetWriteFile("%s_decompiled.txt", file);
@@ -449,6 +607,17 @@ void M_DecompileMacro(const char *file)
 
         scriptline = 0;
         numactions = Com_Read16(buffer);
+        pos += 2;
+
+        // Refuse to walk off the end of the lump when a declared count is
+        // larger than the data that follows it.
+        if(numactions < 0 || pos + (numactions * 6) + 6 > len)
+        {
+            Com_Error("M_DecompileMacro: macro %i declares %i entries which "
+                      "runs past the end of %s (corrupt lump)",
+                      i + 1, numactions, file);
+        }
+
         data = (macrodata_t*)Com_GetFileBuffer(buffer);
         enterloop = false;
         exitloopline = 0;
@@ -505,6 +674,7 @@ void M_DecompileMacro(const char *file)
 
             tag = Com_Read16(buffer);
             spec = Com_Read16(buffer);
+            pos += 6;
 
             if(spec == 204)
             {
@@ -518,6 +688,12 @@ void M_DecompileMacro(const char *file)
             else if(spec == 248 || spec == 250 || spec == 251)
             {
                 tag -= 255;
+            }
+
+            if(spec < 0 || spec >= MAX_LINE_SPECIALS)
+            {
+                Com_FPrintf("    %i : %i;    // out of range special\n", spec, tag);
+                continue;
             }
 
             table = &decmp_table[spec];
@@ -555,6 +731,7 @@ void M_DecompileMacro(const char *file)
         Com_Read16(buffer);
         Com_Read16(buffer);
         Com_Read16(buffer);
+        pos += 6;
     }
 
     Com_CloseFile();

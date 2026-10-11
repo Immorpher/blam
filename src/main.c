@@ -122,6 +122,8 @@ int main(int argc, char **argv)
         M_DecompileMacro(myargv[1]);
     }
 
+    M_Shutdown();
+
     return 1;
 }
 
