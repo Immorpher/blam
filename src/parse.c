@@ -48,7 +48,7 @@ void PS_ParseIdentifier(void)
         current_identifier != &identifier_cap;
         current_identifier = current_identifier->next)
     {
-        if(!strcmp(current_identifier->name, sc_parser->token))
+        if(!strcasecmp(current_identifier->name, sc_parser->token))
         {
             SC_Find();
 

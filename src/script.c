@@ -384,7 +384,7 @@ static void SC_CheckIdentifierArgs(void)
 
     for(i = 0; i < id->numargs; i++)
     {
-        if(!strcmp(sc_parser->token, sc_parser->stack[i].argname))
+        if(!strcasecmp(sc_parser->token, sc_parser->stack[i].argname))
         {
             SC_ClearToken();
 
@@ -664,6 +664,19 @@ void SC_AddIdentifier(void)
     int row;
     int pos;
 
+    // identifiers are case-insensitive, so reject names that differ only by case
+    for(current_identifier = identifier_cap.next;
+        current_identifier != &identifier_cap;
+        current_identifier = current_identifier->next)
+    {
+        if(strcmp(current_identifier->name, sc_parser->token) != 0 &&
+            !strcasecmp(current_identifier->name, sc_parser->token))
+        {
+            SC_Error("Identifier '%s' conflicts with '%s' (names are case-insensitive)",
+                sc_parser->token, current_identifier->name);
+        }
+    }
+
     id = (identifier_t*)Com_Alloc(sizeof(*id));
     strcpy(id->name, sc_parser->token);
     id->numargs = 0;
@@ -753,7 +766,7 @@ void SC_RemoveIdentifier(void)
     {
         identifier_t *id = current_identifier;
 
-        if(!strcmp(id->name, sc_parser->token))
+        if(!strcasecmp(id->name, sc_parser->token))
         {
             identifier_t* next = current_identifier->next;
             (next->prev = current_identifier = id->prev)->next = next;
