@@ -146,7 +146,6 @@ static const char *g_builtin_common_defs =
     "#define Purple_Artifact_Switch(tag)                    92:tag\n"
     "#define Elevator_MoveBy(tag, value)                    PushVar(value); 214:tag\n"
     "#define Pillar_OpenBy(tag, value)                      PushVar(value); 241:tag\n"
-    "#define delay(tics)                                    203:tics; wait\n"
     "#define Floor_RaiseToNearestChangeSlow(tag)            22:tag\n"
     "#define Floor_RaiseTwentyFourChangeSlow(tag)           66:tag\n"
     "#define Floor_RaiseThirtyTwoChangeSlow(tag)            67:tag\n"
